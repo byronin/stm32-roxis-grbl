@@ -347,7 +347,7 @@
 #define COOLANT_MIST_BIT              4 
 
   // Define user-control controls (cycle start, reset, feed hold) input pins.
-  // NOTE: All CONTROLs pins must be on the same port and not on a port with other input pins (limits).
+ // NOTE: All CONTROLs pins must be on the same port and not on a port with other input pins (limits).
 #define CONTROL_PIN_PORT              GPIOB
 #define CONTROL_PORT                  GPIOB
 #define RCC_CONTROL_PORT              RCC_APB2Periph_GPIOB
@@ -507,7 +507,8 @@
 
   // Define flood and mist coolant enable output pins.
   // a later date if flash and memory space allows.
-#define COOLANT_FLOOD_PORT            GPIOB
+// disble edilebilir
+ #define COOLANT_FLOOD_PORT            GPIOB
 #define RCC_COOLANT_FLOOD_PORT        RCC_APB2Periph_GPIOB
 #define COOLANT_FLOOD_BIT             4
 #define COOLANT_MIST_PORT             GPIOB
