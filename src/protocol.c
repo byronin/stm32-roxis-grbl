@@ -191,6 +191,7 @@ void protocol_buffer_synchronize()
 // execute calls a buffer sync, or the planner buffer is full and ready to go.
 void protocol_auto_cycle_start()
 {
+
   if (plan_get_current_block() != NULL) { // Check if there are any blocks in the buffer.
     system_set_exec_state_flag(EXEC_CYCLE_START); // If so, execute them!
   }

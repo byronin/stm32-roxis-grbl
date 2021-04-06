@@ -149,6 +149,8 @@
 #define WORD_X  10
 #define WORD_Y  11
 #define WORD_Z  12
+#define WORD_O  20
+#define WORD_D  21
 // --- YSV 22-06-2018
 #if defined(AA_AXIS) || defined(AB_AXIS) || defined(ABC_AXIS)
 #define WORD_A  13
@@ -215,7 +217,9 @@ typedef struct {
   float p;         // G10 or dwell parameters
   // float q;      // G82 peck drilling
   float r;         // Arc radius
-  float s;         // Spindle speed
+  float s;
+  int o;// LED
+  int d;// motor
   uint8_t t;       // Tool selection
 // --- YSV 22-06-2018
   //float xyz[3];    // X,Y,Z Translational axes

@@ -177,6 +177,9 @@ typedef int bool;
   #warning "CAUTION!!! C AXIS USE SWD (PA13, PA14). AFTER FIRST FLASHING YOU CAN FLASH CONTROLLER ONLY WITH 'UNDER RESET' OPTION AND WITH RESET PIN CONNECTED TO THE PROGRAMMER!!! DON'T USE IT IF NOT SURE!"
 #endif
 
+
+
+
 // ---------------------------------------------------------------------------------------
 
 #endif

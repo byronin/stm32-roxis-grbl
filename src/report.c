@@ -28,6 +28,61 @@
 
 #include "grbl.h"
 
+int satir = 0 , hedef = 0 ,blm0 = 0  ;
+
+void satir_sayisi(int hedef_sifirlama , int hedef_satir){
+	int carpan , hesap1 ;
+	if(hedef_sifirlama == 1){
+		satir = 0 ;
+		blm0 = 0 ;
+	}
+	if(hedef_satir > 0){
+		hedef = hedef_satir;
+		blm0 = hedef / 8 ;
+		carpan = 255 / blm0 ;
+
+	}
+
+	if(satir <  blm0 && satir > 0 ){
+
+		RGB_Write(0, 100, 0, 0);
+
+	}else if(satir >  blm0 && satir <  blm0 * 2  ){
+		hesap1 = satir - blm0 ;
+		RGB_Write(0, 100 , 0, 1);
+	}else if(satir >  blm0 * 2 && satir <  blm0 * 3){
+		hesap1 = satir - blm0 * 2  ;
+		RGB_Write(0, 100, 0, 2);
+	}else if(satir >  blm0 * 3 && satir <  blm0 * 4){
+		hesap1 = satir - blm0 * 3  ;
+		RGB_Write(0, 100 , 0, 3);
+	}else if(satir >  blm0 * 4 && satir <  blm0 * 5){
+		hesap1 = satir - blm0 * 4  ;
+		RGB_Write(0, 100, 0, 4);
+	}else if(satir >  blm0 * 5 && satir <  blm0 * 6){
+		hesap1 = satir - blm0 * 5  ;
+		RGB_Write(0,100, 0, 5);
+	}else if(satir >  blm0 * 6 && satir <  blm0 * 7){
+		hesap1 = satir - blm0 * 6  ;
+		RGB_Write(0, 100 , 0, 6);
+	}else if(satir >  blm0 * 7 && satir <  blm0 * 8 ){
+		hesap1 = satir - blm0 * 8  ;
+		RGB_Write(0,100, 0, 7);
+	} else {
+		RGB_Write(0,  0, 10, 0);
+		RGB_Write(0,  0, 10, 1);
+		RGB_Write(0,  0, 10, 2);
+		RGB_Write(0,  0, 10, 3);
+		RGB_Write(0,  0, 10, 4);
+		RGB_Write(0,  0, 10, 5);
+		RGB_Write(0,  0, 10, 6);
+		RGB_Write(0,  0, 10, 7);
+
+	}
+
+
+
+	}
 
 // Internal report utilities to reduce flash with repetitive tasks turned into functions.
 void report_util_setting_prefix(uint8_t n) { serial_write('$'); print_uint8_base10(n); serial_write('='); }
@@ -112,7 +167,13 @@ void report_status_message(uint8_t status_code)
 {
   switch(status_code) {
     case STATUS_OK: // STATUS_OK
-      printPgmString(PSTR("ok\r\n")); break;
+      printPgmString(PSTR("ok\r\n")); satir++; satir_sayisi(0,0); show_led(); break;
+      /*   if(satir > 10){
+
+    	  printInteger(satir);
+    	  serial_write("\r\n");
+      }*/
+      break;
     default:
       printPgmString(PSTR("error:"));
       print_uint8_base10(status_code);
@@ -168,7 +229,7 @@ void report_feedback_message(uint8_t message_code)
 // Welcome message
 void report_init_message()
 {
-  printPgmString(PSTR("\r\nGrbl " GRBL_VERSION " ['$' for help]\r\n"));
+  printPgmString(PSTR("\r\nRX Laser " GRBL_VERSION " ['$' for help]\r\n"));
 }
 
 // Grbl help message

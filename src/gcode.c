@@ -20,7 +20,7 @@
 */
 
 #include "grbl.h"
-
+int ldsy = 0 ;
 // NOTE: Max line number is defined by the g-code standard to be 99999. It seems to be an
 // arbitrary value, and some GUIs may require more. So we increased it based on a max safe
 // value when converting a float (7.2 digit precision)s to an integer.
@@ -46,6 +46,7 @@ void gc_init()
   // Load default G54 coordinate system.
   if (!(settings_read_coord_data(gc_state.modal.coord_select,gc_state.coord_system))) {
     report_status_message(STATUS_SETTING_READ_FAIL);
+
   }
 }
 
@@ -109,7 +110,7 @@ uint8_t gc_execute_line(char *line)
   uint8_t char_counter;
   char letter;
   float value;
-  uint8_t int_value = 0;
+  uint32_t int_value = 0;
   uint16_t mantissa = 0;
   if (gc_parser_flags & GC_PARSER_JOG_MOTION) { char_counter = 3; } // Start parsing after `$J=`
   else { char_counter = 0; }
@@ -140,6 +141,7 @@ uint8_t gc_execute_line(char *line)
       /* 'G' and 'M' Command Words: Parse commands and check for modal group violations.
          NOTE: Modal group numbers are defined in Table 4 of NIST RS274-NGC v3, pg.20 */
       case 'G':
+
 #ifdef  USE_RESET_BTN_AS_ESTOP
 		if(system_control_get_state() & CONTROL_PIN_INDEX_RESET) { // if reset button is pressed
 			mc_reset();
@@ -162,7 +164,7 @@ uint8_t gc_execute_line(char *line)
               if (!((mantissa == 0) || (mantissa == 10))) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); }
               gc_block.non_modal_command += mantissa;
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
-            }                
+            }
             break;
           case 0: case 1: case 2: case 3: case 38:
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
@@ -179,7 +181,7 @@ uint8_t gc_execute_line(char *line)
               }
               gc_block.modal.motion += (mantissa/10)+100;
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
-            }  
+            }
             break;
           case 17: case 18: case 19:
             word_bit = MODAL_GROUP_G2;
@@ -335,6 +337,9 @@ uint8_t gc_execute_line(char *line)
 		  case 'X': word_bit = WORD_X; gc_block.values.xyz[X_AXIS] = value; axis_words |= (1<<X_AXIS); break;
           case 'Y': word_bit = WORD_Y; gc_block.values.xyz[Y_AXIS] = value; axis_words |= (1<<Y_AXIS); break;
           case 'Z': word_bit = WORD_Z; gc_block.values.xyz[Z_AXIS] = value; axis_words |= (1<<Z_AXIS); break;
+          case 'O': word_bit = WORD_O; gc_block.values.o = int_value; satir_sayisi(1 , int_value);  break;
+          case 'D': word_bit = WORD_O; gc_block.values.o = int_value;  Motor_DC(int_value); break;
+
           default: FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND);
         }
 
@@ -348,6 +353,10 @@ uint8_t gc_execute_line(char *line)
         value_words |= bit(word_bit); // Flag to indicate parameter assigned.
 
     }
+
+
+
+
   }
   // Parsing complete!
 
@@ -460,7 +469,7 @@ uint8_t gc_execute_line(char *line)
 		}
 	}
 #endif
-	
+
   // [10. Dwell ]: P value missing. P is negative (done.) NOTE: See below.
   if (gc_block.non_modal_command == NON_MODAL_DWELL) {
     if (bit_isfalse(value_words,bit(WORD_P))) { FAIL(STATUS_GCODE_VALUE_WORD_MISSING); } // [P word missing]
@@ -554,7 +563,7 @@ uint8_t gc_execute_line(char *line)
       // Determine coordinate system to change and try to load from EEPROM.
       if (coord_select > 0) { coord_select--; } // Adjust P1-P6 index to EEPROM coordinate data indexing.
       else { coord_select = gc_block.modal.coord_select; } // Index P0 as the active coordinate system
-      
+
       // NOTE: Store parameter data in IJK values. By rule, they are not in use with this command.
       if (!settings_read_coord_data(coord_select,gc_block.values.ijk)) { FAIL(STATUS_SETTING_READ_FAIL); } // [EEPROM read fail]
 
@@ -686,7 +695,7 @@ uint8_t gc_execute_line(char *line)
           if (!axis_words) { axis_command = AXIS_COMMAND_NONE; }
 
           break;
-        case MOTION_MODE_CW_ARC: 
+        case MOTION_MODE_CW_ARC:
           gc_parser_flags |= GC_PARSER_ARC_IS_CLOCKWISE; // No break intentional.
         case MOTION_MODE_CCW_ARC:
           // [G2/3 Errors All-Modes]: Feed rate undefined.
@@ -899,7 +908,7 @@ uint8_t gc_execute_line(char *line)
           gc_parser_flags |= GC_PARSER_LASER_DISABLE;
       }
 
-      // Any motion mode with axis words is allowed to be passed from a spindle speed update. 
+      // Any motion mode with axis words is allowed to be passed from a spindle speed update.
       // NOTE: G1 and G0 without axis words sets axis_command to none. G28/30 are intentionally omitted.
       // TODO: Check sync conditions for M3 enabled motions that don't enter the planner. (zero length).
       if (axis_words && (axis_command == AXIS_COMMAND_MOTION_MODE)) {
@@ -960,7 +969,7 @@ uint8_t gc_execute_line(char *line)
   }
   // NOTE: Pass zero spindle speed for all restricted laser motions.
   if (bit_isfalse(gc_parser_flags, GC_PARSER_LASER_DISABLE)) {
-      pl_data->spindle_speed = gc_state.spindle_speed; // Record data for planner use. 
+      pl_data->spindle_speed = gc_state.spindle_speed; // Record data for planner use.
   } // else { pl_data->spindle_speed = 0.0; } // Initialized as zero already.
 
   // [5. Select tool ]: NOT SUPPORTED. Only tracks tool value.
@@ -1095,8 +1104,8 @@ uint8_t gc_execute_line(char *line)
           pl_data->condition |= PL_COND_FLAG_NO_FEED_OVERRIDE;
         #endif
         gc_update_pos = mc_probe_cycle(gc_block.values.xyz, pl_data, gc_parser_flags);
-    }  
-     
+    }
+
       // As far as the parser is concerned, the position is now == target. In reality the
       // motion control system might still be processing the action and the real tool position
       // in any intermediate location.
@@ -1105,7 +1114,7 @@ uint8_t gc_execute_line(char *line)
       } else if (gc_update_pos == GC_UPDATE_POS_SYSTEM) {
         gc_sync_position(); // gc_state.position[] = sys_position
       } // == GC_UPDATE_POS_NONE
-    }     
+    }
 
   }
 
@@ -1162,6 +1171,7 @@ uint8_t gc_execute_line(char *line)
   // TODO: % to denote start of program.
 
   return(STATUS_OK);
+
 }
 
 
